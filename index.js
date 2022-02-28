@@ -128,9 +128,9 @@ app.post("/jwt", async (req, res) => {
 app.post("/aggregate", async (req, res) => {
   try {
     //Save data in mongodb or SQL db
-    // const data = req.body;
     const db = await client.db("webd");
     const collection = db.collection("documents");
+    // const data = req.body;
     // const result = await collection.insertMany(data);
     // Comment above line of code if already saved data in db
     const pipeline = [
@@ -143,13 +143,23 @@ app.post("/aggregate", async (req, res) => {
         },
       },
       { $project: { average: { $round: ["$average", 0] } } },
+      {
+        $addFields: {
+          department: {
+            $function: {
+              body: `function(id) {
+                return id;
+              }`,
+              args: ["$_id"],
+              lang: "js",
+            },
+          },
+        },
+      },
+      { $unset: "_id" },
     ];
     //Perform the aggregation
     const result = await collection.aggregate(pipeline).toArray();
-    result.forEach((element) => {
-      element.department = element._id;
-      delete element._id;
-    });
     res.json(result);
   } catch (error) {
     console.log(error);
