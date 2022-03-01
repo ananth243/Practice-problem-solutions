@@ -176,22 +176,16 @@ app.get("/stream", (req, res) => {
 //Cache part
 app.get("/cache", async (req, res) => {
   try {
-    redisClient.get("data", async (err, data) => {
-      if (err) {
-        console.error(err);
-        throw err;
-      }
-
-      if (data) {
-        res.status(200).send(JSON.parse(data));
-      } else {
-        const db = await client.db("webd");
-        const collection = db.collection("documents");
-        const result = await collection.find({}).toArray();
-        redisClient.setEx("data", 600, JSON.stringify(result));
-        res.status(200).json(result);
-      }
-    });
+    const data = await redisClient.get("data");
+    if (data) {
+      res.status(200).send(JSON.parse(data));
+    } else {
+      const db = await client.db("webd");
+      const collection = db.collection("documents");
+      const result = await collection.find({}).toArray();
+      redisClient.setEx("data", 600, JSON.stringify(result));
+      res.status(200).json(result);
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
