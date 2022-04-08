@@ -66,14 +66,14 @@ const options = {
   },
 };
 
-// const io = socket(server, options);
-// io.on("connection", (socket) => {
-//   console.log(`Connected ${socket.id}`);
-//   socket.on("talk", (data) => {
-//     console.log("talk", data);
-//     socket.emit("talk", data);
-//   });
-// });
+const io = socket(server, options);
+io.on("connection", (socket) => {
+  console.log(`Connected ${socket.id}`);
+  socket.on("talk", (data) => {
+    console.log(data);
+    socket.emit("talk", data);
+  });
+});
 
 // Setup CORS
 app.get("/cors", (req, res) => {
